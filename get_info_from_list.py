@@ -1,15 +1,20 @@
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
+import argparse
 
 
 def get_formatted_info(spotify_client, input_uri):
     # Get the current track info
     j_results = spotify_client.track(track_id=input_uri)
 
+    # Create a list with all artists' names
+    artists_list = [(j_results['artists'][i]['name'] + '; ') for i in range(len(j_results['artists']))]
+    artists_list[-1] = artists_list[-1][:-2]
+
     # Parse the JSON result
     output_info = '%02d' % track_idx +\
                   ') ' +\
-                  j_results['artists'][0]['name'] +\
+                  ''.join(artists_list) +\
                   ' - ' +\
                   j_results['name'] +\
                   '\n' +\
@@ -26,16 +31,23 @@ def get_formatted_info(spotify_client, input_uri):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Load a Spotify playlist and retrieve some useful info from it.')
+    parser.add_argument('input_file', metavar='in', type=str,
+                        help='The input file that contains a list with Spotify URIs, onr for each playlist track.')
+    parser.add_argument('output_file', metavar='out', type=str,
+                        help='The output file. The script will write the retrieved info there.')
+    args = parser.parse_args()
+
     # Initialise the Spotipy instance and feed it with the required credentials.
     client_credentials_manager = SpotifyClientCredentials()
     sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
     # Load the input file
-    input_file = open("input.txt", "r")
+    input_file = open(args.input_file, "r")
     input_URIs = input_file.read().splitlines()
 
     # Open the output file
-    output_file = open("output.txt", "w")
+    output_file = open(args.output_file, "w")
 
     # Init a counter
     track_idx = 1
