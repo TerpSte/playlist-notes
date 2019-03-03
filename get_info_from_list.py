@@ -30,12 +30,18 @@ def get_formatted_info(spotify_client, input_uri):
     return output_info
 
 
+def v_print(should_be_verbose, *args, **kwargs):
+    if should_be_verbose:
+        print(*args, **kwargs)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Load a Spotify playlist and retrieve some useful info from it.')
     parser.add_argument('input_file', metavar='in', type=str,
                         help='The input file that contains a list with Spotify URIs, onr for each playlist track.')
     parser.add_argument('output_file', metavar='out', type=str,
                         help='The output file. The script will write the retrieved info there.')
+    parser.add_argument('-v', help='Increase output verbosity.', action='store_true')
     args = parser.parse_args()
 
     # Initialise the Spotipy instance and feed it with the required credentials.
@@ -59,16 +65,20 @@ if __name__ == "__main__":
         uri.strip("\n")
 
         # Print the currently processed file
-        print("Now loading: " + uri)
+        v_print(args.v, "Now loading: " + uri)
 
         # Parse the JSON result
         output_info = get_formatted_info(sp, uri)
 
-        print(output_info)
+        # Some more printing of the formatted info
+        v_print(args.v, output_info)
 
+        # Write in output file
         output_file.write(output_info)
 
+        # Increase counter
         track_idx += 1
 
+    # Close all opened files
     input_file.close()
     output_file.close()
