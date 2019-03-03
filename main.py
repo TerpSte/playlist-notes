@@ -6,8 +6,14 @@ client_credentials_manager = SpotifyClientCredentials()
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 # Load the input file
-input_file = open(".\\input.txt", "r")
+input_file = open("input.txt", "r")
 input_URIs = input_file.read().splitlines()
+
+# Open the output file
+output_file = open("output.txt", "w")
+
+# Init a counter
+track_idx = 1
 
 # Iterate over all input elements
 uri: str
@@ -22,7 +28,8 @@ for uri in input_URIs:
     j_results = sp.track(track_id=uri)
 
     # Parse the JSON result
-    output_info = '-   ' +\
+    output_info = '%02d' % track_idx +\
+                  ') ' +\
                   j_results['artists'][0]['name'] +\
                   ' - ' +\
                   j_results['name'] +\
@@ -33,6 +40,14 @@ for uri in input_URIs:
                   j_results['album']['album_type'] +\
                   ') [' +\
                   j_results['album']['release_date'] +\
-                  ']'
+                  ']' +\
+                  '\n\n'
 
     print(output_info)
+
+    output_file.write(output_info)
+
+    track_idx += 1
+
+input_file.close()
+output_file.close()
